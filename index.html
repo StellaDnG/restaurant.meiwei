@@ -1,0 +1,157 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>美味餐廳 - 點餐系統</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>美味餐廳</h1>
+    <p>探索我們的精選菜單，享受美食的樂趣！</p>
+  </header>
+
+  <section id="about">
+    <h2>關於美味餐廳</h2>
+    <p>美味餐廳成立於2015年，致力於將新鮮食材與創意料理結合，為顧客帶來難忘的用餐體驗。我們的廚師團隊精選當季食材，融合義式、亞洲與在地風味，打造獨特而均衡的菜單。無論是浪漫晚餐或家庭聚會，美味餐廳都以溫馨的環境和用心服務，讓您感受到家的溫暖。歡迎來品嚐我們的招牌料理，開啟一場味蕾的冒險！</p>
+  </section>
+
+  <section id="menu">
+    <h2>菜單介紹</h2>
+    <div class="menu-container">
+      <div class="menu-item">
+        <img src="https://i2.kknews.cc/IsY2_MfIGbaTN4Ax7pV9mxtMdiTQ_pohfWuV25c/0.jpg" alt="義大利麵">
+        <h3>經典義大利麵</h3>
+        <p>特色：手工製作的寬扁麵，搭配新鮮番茄醬與羅勒葉，慢煮數小時，醬汁濃郁，散發天然果香，完美展現義式經典風味。</p>
+        <p class="price">NT$250</p>
+        <button class="add-to-cart" data-item="義大利麵" data-price="250">加入購物車</button>
+      </div>
+      <div class="menu-item">
+        <img src="http://k.sinaimg.cn/n/front/4/w964h640/20181218/c8un-hqhtqsp9576807.jpg/w700d1q75cms.jpg" alt="牛排">
+        <h3>炭烤牛排</h3>
+        <p>特色：嚴選頂級肋眼牛排，炭火慢烤鎖住肉汁，搭配獨家黑胡椒醬，口感外焦內嫩，肉香四溢，讓人回味無窮。</p>
+        <p class="price">NT$450</p>
+        <button class="add-to-cart" data-item="牛排" data-price="450">加入購物車</button>
+      </div>
+      <div class="menu-item">
+        <img src="https://ciao.kitchen/wp-content/uploads/2016/07/molten-chocolate-cake-01.jpg" alt="甜點">
+        <h3>巧克力熔岩蛋糕</h3>
+        <p>特色：溫熱的蛋糕外層酥脆，內餡濃郁巧克力如熔岩般流淌，搭配一球香草冰淇淋，甜而不膩，令人沉醉。</p>
+        <p class="price">NT$150</p>
+        <button class="add-to-cart" data-item="巧克力熔岩蛋糕" data-price="150">加入購物車</button>
+      </div>
+      <div class="menu-item">
+        <img src="https://img.cook1cook.com/upload/cover/98/65/7351414931974609865.jpg" alt="凱薩沙拉">
+        <h3>清爽凱薩沙拉</h3>
+        <p>特色：新鮮採摘的羅曼生菜，搭配自製凱薩醬，撒上現刨帕瑪森起司與香脆麵包丁，口感層次豐富，清爽開胃。</p>
+        <p class="price">NT$180</p>
+        <button class="add-to-cart" data-item="凱薩沙拉" data-price="180">加入購物車</button>
+      </div>
+      <div class="menu-item">
+        <img src="https://imageproxy.icook.network/fit?background=255%2C255%2C255&height=443&nocrop=true&stripmeta=true&type=auto&url=http%3A%2F%2Ftokyo-kitchen.icook.tw.s3.amazonaws.com%2Fuploads%2Frecipe%2Fcover%2F223115%2F425abeb4d8a26d09.jpg&width=443" alt="海鮮燉飯">
+        <h3>海鮮燉飯</h3>
+        <p>特色：新鮮蝦、魷魚與蛤蜊，搭配義大利米慢燉，米粒吸飽海鮮湯汁，濃郁鮮甜，每一口都充滿海洋風味。</p>
+        <p class="price">NT$320</p>
+        <button class="add-to-cart" data-item="海鮮燉飯" data-price="320">加入購物車</button>
+      </div>
+      <div class="menu-item">
+        <img src="https://www.nespresso.com/ncp/res/uploads/recipes/Global_All_OL_BaristaCreations_IcedRosemaryLatte_Caramel_2019_0000_1900px.jpg" alt="冰拿鐵咖啡">
+        <h3>冰拿鐵咖啡</h3>
+        <p>特色：精選單一產地咖啡豆，現磨萃取，與冰涼鮮奶融合，奶泡細膩，咖啡香氣濃郁，完美提神飲品。</p>
+        <p class="price">NT$120</p>
+        <button class="add-to-cart" data-item="冰拿鐵咖啡" data-price="120">加入購物車</button>
+      </div>
+      <div class="menu-item">
+        <img src="https://www.flipbakery.com.tw/product_image/images/drink/%E8%8A%92%E6%9E%9C%E6%9E%9C%E6%98%94/Untitled-1.jpg" alt="芒果果昔">
+        <h3>芒果果昔</h3>
+        <p>特色：當季愛文芒果新鮮現打，與天然酸奶混合，口感濃郁滑順，甜中帶微酸，充滿熱帶果香。</p>
+        <p class="price">NT$140</p>
+        <button class="add-to-cart" data-item="芒果果昔" data-price="140">加入購物車</button>
+      </div>
+      <div class="menu-item">
+        <img src="https://www.healingdaily.com.tw/media/article/00/07/722_62d00208b947.jpeg" alt="檸檬氣泡水">
+        <h3>檸檬氣泡水</h3>
+        <p>特色：手榨新鮮檸檬汁，加入清爽氣泡水，微甜酸香，搭配薄荷葉點綴，冰涼解渴，適合佐餐。</p>
+        <p class="price">NT$90</p>
+        <button class="add-to-cart" data-item="檸檬氣泡水" data-price="90">加入購物車</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="cart">
+    <h2>購物車</h2>
+    <ul id="cart-items"></ul>
+    <p id="cart-total">總計: NT$0</p>
+    <button id="clear-cart">清空購物車</button>
+    <button id="checkout">結帳</button>
+  </section>
+
+  <section id="payment-form" style="display: none;">
+    <h2>支付資訊</h2>
+    <div class="form-container">
+      <label for="card-name">持卡人姓名:</label>
+      <input type="text" id="card-name" placeholder="姓名" required>
+      <label for="card-number">信用卡號:</label>
+      <input type="text" id="card-number" placeholder="1234 5678 9012 3456" required>
+      <label for="card-expiry">有效日期:</label>
+      <input type="text" id="card-expiry" placeholder="MM/YY" required>
+      <label for="card-cvv">CVV:</label>
+      <input type="text" id="card-cvv" placeholder="123" required>
+      <button id="submit-payment">確認支付</button>
+      <button id="cancel-payment">取消訂單</button>
+    </div>
+  </section>
+
+  <section id="order-confirmation" style="display: none;">
+    <h2>訂單確認</h2>
+    <p>感謝您的訂單！我們已收到您的支付，訂單將很快處理。</p>
+    <button id="back-to-menu">返回菜單</button>
+  </section>
+
+  <footer>
+    <p>© 2025 美味餐廳. 版權所有.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
